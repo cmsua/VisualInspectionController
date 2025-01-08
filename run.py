@@ -8,7 +8,7 @@ import numpy as np
 from stitcher import main
 from grid import create_grid
 from machine import create_images
-from image_io import write_images, load_images
+from image_io import write_images, load_images_numpy
 
 parser = argparse.ArgumentParser(
                     prog='Visual Inspection Control',
@@ -83,11 +83,11 @@ if args.reuse:
   folder = max(all_subdirs, key=os.path.getmtime)
 
   logger.info(f"Loading images from folder {folder}")
-  images = load_images(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
+  np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
 elif args.dir:
   folder = args.dir
   logger.info(f"Loading images from folder {folder}")
-  images = load_images(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
+  np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
 else:
   logger.info("Scanning images")
   start_time = datetime.datetime.now()
@@ -96,7 +96,28 @@ else:
   # Make Dirs
   folder = os.path.join(output_dir, str(start_time))
 
+  # Saving images
+  logger.info("Saving images")
   write_images(images, folder, x_start, x_inc, y_start, y_inc)
+
+  # Convert to Numpy
+  logger.info("Converting to Numpy")
+
+  rows = len(images)
+  cols = len(images[0])
+  size = images[0][0].size
+
+  np_images = np.zeros((rows, cols, size[1], size[0], 3), dtype=np.uint8)
+  for row_idx in range(rows):
+      row = np.zeros((cols, size[1], size[0], 3), dtype=np.uint8)
+      for column_idx in range(cols):
+          row[column_idx] = np.asarray(images[row_idx][column_idx], dtype=np.uint8)
+      
+      images[row_idx] = row
+      logger.info(f'Converted row {row_idx}')
+
+  
+  logger.info('Converted all images')
 
 logger.info("Loaded images")
 
@@ -105,15 +126,10 @@ logger.info("Loaded images")
 ##
 if not args.no_grid:
   logger.info("Creating grid")
-  create_grid(images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
+  # create_grid(images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
 
-logger.info("Converting images for stitching")
-for row_num, row in enumerate(images):
-    for col_num, image in enumerate(row):
-        images[row_num][col_num] = np.array(image.convert('RGB'))
-        image.close()
 
 logger.info("Stitchng images")
-main(images, 0.2, 0.2, os.path.join(folder, 'stitched.png'))
+main(np_images, 0.2, 0.2, os.path.join(folder, 'stitched.png'))
 
 logger.info("Finished, exiting...")

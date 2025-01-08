@@ -161,22 +161,20 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
 
 
 def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
-    total_image_shape = [2160, 3840]
+    total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
     horz_clip = math.floor(total_image_shape[1]*horz_clip_fraction)
 
     logger.info("Clipping images")
-    clipped_images = []
-    for row in images:
-        clipped_row = []
-        for image in row:
+    clipped_images = np.zeros((len(images), len(images[0]), total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
+    for row_num, row in enumerate(images):
+        for col_num, image in enumerate(row):
             clipped_img = clip_image(image,
                                      top_clip=vert_clip,
                                      bottom_clip=vert_clip,
                                      left_clip=horz_clip,
                                      right_clip=horz_clip)
-            clipped_row.append(clipped_img)
-        clipped_images.append(clipped_row)
+            clipped_images[row_num][col_num] = clipped_img
 
     rows = len(images)
     columns = len(images[0])
@@ -199,7 +197,7 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
 
     logger.info(f"Stitching {rows} rows")
     # Now use horiz_overlap for stitching each row horizontally
-    stitched_rows = []
+    stitched_rows = None
     for row_index in range(rows):
         logger.info(f"Stitching row {row_index}")
         row_strip = clipped_images[row_index][0]
@@ -209,14 +207,10 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
                                      clipped_images[row_index][col_index],
                                      overlap_width=horiz_overlap,
                                      direction='horizontal')
-            
-            # Memory cleanup
-            clipped_images[row_index][col_index] = None
         
-        # Memory cleanup
-        clipped_images[row_index] = None
-
-        stitched_rows.append(row_strip)
+        if stitched_rows is None:
+            stitched_rows = np.zeros((rows, *row_strip.shape), dtype=np.uint8)
+        stitched_rows[row_index] = row_strip
     
     # Memory cleanup
     clipped_images = None

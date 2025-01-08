@@ -3,7 +3,8 @@ import os
 import multiprocessing
 
 from PIL import Image
-
+import numpy as np
+import cv2
 
 logger = logging.getLogger('image_io')
 
@@ -66,3 +67,28 @@ def load_images(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
         images += [row]
 
     return images
+
+def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
+    logger.info(f'Loading to Numpy from {dir}')
+
+    rows = len(range(y_start, y_end + y_inc, y_inc))
+    cols = len(range(x_start, x_end + x_inc, x_inc))
+    
+    np_images = None
+    for row_id, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
+        row_strip = None
+        for col_id, x in enumerate(range(x_start, x_end + x_inc, x_inc)):
+            logger.debug(f'Loading image X{x}Y{y}.png')
+            file = os.path.join(dir, 'raw', f'X{x}Y{y}.png')
+            image = cv2.cvtColor(cv2.imread(file), cv2.COLOR_BGR2RGB)
+
+            if row_strip is None:
+                row_strip = np.zeros((cols, *image.shape), dtype=np.uint8)
+            row_strip[col_id] = np.asarray(image, dtype=np.uint8)
+            
+        if np_images is None:
+            np_images = np.zeros((rows, *row_strip.shape), dtype=np.uint8)
+        np_images[row_id] = row_strip
+        logger.info(f'Loaded row {row_id}')
+
+    return np_images
