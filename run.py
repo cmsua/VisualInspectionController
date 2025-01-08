@@ -114,6 +114,6 @@ for row_num, row in enumerate(images):
         image.close()
 
 logger.info("Stitchng images")
-main(images, 0.1, 0.1, os.path.join(folder, 'stitched.png'))
+main(images, 0.2, 0.2, os.path.join(folder, 'stitched.png'))
 
 logger.info("Finished, exiting...")

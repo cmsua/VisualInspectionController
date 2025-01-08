@@ -180,7 +180,9 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
 
     rows = len(images)
     columns = len(images[0])
-    del images
+
+    # Memory cleanup
+    images = None
 
     center_x = len(clipped_images) // 2
     center_y = len(clipped_images[0]) // 2
@@ -195,10 +197,11 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
     vert_overlap = find_best_vertical_overlap(clipped_images[center_x][center_y], clipped_images[center_x + 1][center_y])
     logger.info(f"Found vertical overlap {vert_overlap}")
 
-    logger.info("Stitching rows")
+    logger.info(f"Stitching {rows} rows")
     # Now use horiz_overlap for stitching each row horizontally
     stitched_rows = []
     for row_index in range(rows):
+        logger.info(f"Stitching row {row_index}")
         row_strip = clipped_images[row_index][0]
         for col_index in range(1, columns):
             # Use the determined horizontal overlap width
@@ -206,16 +209,27 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
                                      clipped_images[row_index][col_index],
                                      overlap_width=horiz_overlap,
                                      direction='horizontal')
+            
+            # Memory cleanup
+            clipped_images[row_index][col_index] = None
+        
+        # Memory cleanup
+        clipped_images[row_index] = None
+
         stitched_rows.append(row_strip)
+    
+    # Memory cleanup
+    clipped_images = None
 
     logger.info("Stitching to final image")
     # Now stitch the rows together vertically using the determined vert_overlap
     final_image = stitched_rows[0]
     for r in range(1, rows):
+        logger.info(f"Stitching column {r}")
         final_image = blend_images(final_image,
                                    stitched_rows[r],
                                    overlap_width=vert_overlap,
                                    direction='vertical')
         
     logger.info("Saving...")
-    cv2.imwrite(final_image, output_file)
+    cv2.imwrite(output_file, final_image)

@@ -9,6 +9,7 @@ logger = logging.getLogger('image_io')
 
 def write_image(image, paths):
     for path in paths:
+        logger.debug(f'Saving image to {paths}')
         image.save(path)
 
 def write_images(images, dir, x_start, x_inc, y_start, y_inc):
@@ -44,10 +45,8 @@ def write_images(images, dir, x_start, x_inc, y_start, y_inc):
 
     logger.info('Queued all images')
     
-    with multiprocessing.Pool(processes=8) as pool:
+    with multiprocessing.Pool(processes=16) as pool:
         pool.starmap(write_image, files)
-
-    logger.info('Saved images')
 
 def load_images(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
     logger.info(f'Loading from {dir}')
