@@ -30,13 +30,15 @@ logger = logging.getLogger('main')
 ##
 output_dir = 'Pictures'
 
+zoomed_in = False
+
 x_start = 0
 x_end = 190
-x_inc = 20 # 45
+x_inc = 20 if zoomed_in else 45
 
 y_start = 45
 y_end = 205
-y_inc = 10 # 25
+y_inc = 10 if zoomed_in else 25
 
 stabilize_delay = 1 # 2.2
 
@@ -119,6 +121,7 @@ else:
   
   logger.info('Converted all images')
 
+images = None
 logger.info("Loaded images")
 
 ##
@@ -126,7 +129,7 @@ logger.info("Loaded images")
 ##
 if not args.no_grid:
   logger.info("Creating grid")
-  # create_grid(images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
+  create_grid(np_images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
 
 
 logger.info("Stitchng images")

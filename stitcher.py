@@ -1,7 +1,7 @@
 import math
 import logging
 
-from PIL import Image
+from memory_profiler import profile
 import numpy as np
 import cv2
 
@@ -159,7 +159,7 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
         stitched = np.concatenate([imgA[:-overlap_width, :], blended_region, imgB[overlap_width:, :]], axis=0)
         return stitched
 
-
+@profile
 def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)

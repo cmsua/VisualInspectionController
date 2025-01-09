@@ -2,6 +2,7 @@ import logging
 import os
 import multiprocessing
 
+from memory_profiler import profile
 from PIL import Image
 import numpy as np
 import cv2
@@ -68,6 +69,7 @@ def load_images(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
 
     return images
 
+@profile
 def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
     logger.info(f'Loading to Numpy from {dir}')
 
