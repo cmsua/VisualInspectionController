@@ -12,7 +12,7 @@ logger = logging.getLogger('image_io')
 def write_image(image, paths):
     for path in paths:
         logger.debug(f'Saving image to {paths}')
-        image.save(path)
+        cv2.imwrite(path, image)
 
 def write_images(images, dir, x_start, x_inc, y_start, y_inc):
     os.makedirs(dir)

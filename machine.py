@@ -3,6 +3,7 @@ import datetime
 import time
 
 import moonrakerpy as moonpy
+import numpy as np
 
 from camera import CameraWrapper
 
@@ -32,18 +33,19 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
 
     start_time = datetime.datetime.now()
 
-    images = []
+    images = None
 
     forward = True
     # Iterate over a grid
-    for y in range(y_start, y_end + y_inc, y_inc):
+    rows = len(range(y_start, y_end + y_inc, y_inc))
+    cols = len(range(x_start, x_end + x_inc, x_inc))
+    for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching
         x_points = range(x_start, x_end + x_inc, x_inc)
         if not forward:
             x_points = reversed(x_points)
 
-        row = []
-        for x in x_points:
+        for col_index, x in enumerate(x_points):
             # Check for skipped points
             skip = False
             for point in skipped_points:
@@ -53,11 +55,10 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
 
             if skip:
                 logger.info(f'Skipping point {x}, {y}')
-                row += [None]
                 continue
 
             # Move machine
-            logger.info(f'Moving to {x}, {y} out of {x_end + x_inc}, {y_end + y_inc}')
+            logger.info(f'Moving to {x}, {y} out of {x_end + x_inc}, {y_end + y_inc} (row: {row_index}, image captured: {col_index})')
             printer.send_gcode(f'G1 X{x} Y{y} F12000')
             printer.send_gcode('M400')
 
@@ -68,12 +69,16 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
             # Write image
             logger.debug('Reading frame')
             frame = camera.get_image()
-            row += [frame]
 
-        if not forward:
-            row.reverse()
+            if images is None:
+                logger.debug('Creating images')
+                images = np.zeros((rows, cols, *frame.shape), dtype=np.uint8)
+            
+            col_index_actual = col_index if forward else cols - col_index - 1
+            logger.debug(f'Using col index {col_index_actual}')
 
-        images += [row]
+            images[row_index][col_index_actual] = frame
+
         forward = not forward
 
     seconds = (datetime.datetime.now() - start_time).seconds

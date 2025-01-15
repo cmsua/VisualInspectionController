@@ -93,35 +93,15 @@ elif args.dir:
 else:
   logger.info("Scanning images")
   start_time = datetime.datetime.now()
-  images = create_images(x_start, x_inc, y_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
+  np_images = create_images(x_start, x_inc, y_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
 
   # Make Dirs
   folder = os.path.join(output_dir, str(start_time))
 
   # Saving images
   logger.info("Saving images")
-  write_images(images, folder, x_start, x_inc, y_start, y_inc)
+  write_images(np_images, folder, x_start, x_inc, y_start, y_inc)
 
-  # Convert to Numpy
-  logger.info("Converting to Numpy")
-
-  rows = len(images)
-  cols = len(images[0])
-  size = images[0][0].size
-
-  np_images = np.zeros((rows, cols, size[1], size[0], 3), dtype=np.uint8)
-  for row_idx in range(rows):
-      row = np.zeros((cols, size[1], size[0], 3), dtype=np.uint8)
-      for column_idx in range(cols):
-          row[column_idx] = np.asarray(images[row_idx][column_idx], dtype=np.uint8)
-      
-      images[row_idx] = row
-      logger.info(f'Converted row {row_idx}')
-
-  
-  logger.info('Converted all images')
-
-images = None
 logger.info("Loaded images")
 
 ##

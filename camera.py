@@ -53,8 +53,13 @@ class CameraWrapper():
       self.queue.put(frame)
   
   def get_image(self):
-    segment = Image.fromarray(cv2.cvtColor(self.queue.get(), cv2.COLOR_BGR2RGB))
-    segment = segment.transpose(Image.ROTATE_180)
+    segment = self.queue.get()
+    logger.debug('Image captured')
+
+    segment = cv2.cvtColor(segment, cv2.COLOR_BGR2RGB)
+    segment = cv2.rotate(segment, cv2.ROTATE_180)
+
+    logger.debug('Image converted and rotated')
     return segment
 
   def close(self):
