@@ -44,37 +44,10 @@ stabilize_delay = 2.2
 
 stitched_scale = 4
 
-skipped_points = [
-  # (0, 45),
-  # (0, 55),
-  # (0, 65),
-  # (0, 75),
-  # (0, 85),
-  # (20, 45),
+skipped_points = []
 
-  # (0, 175),
-  # (0, 185),
-  # (0, 195),
-  # (0, 205),
-  # (20, 205),
-
-  # (200, 155),
-  # (200, 165),
-  # (200, 175),
-  # (200, 185),
-  # (200, 195),
-  # (200, 205),
-
-  # (180, 45),
-  # (180, 55),
-  # (180, 65),
-  # (200, 45),
-  # (200, 55),
-  # (200, 65),
-  # (200, 75),
-  # (200, 85),
-  # (200, 95)
-]
+vertical_clip_fraction = 0.2
+horizontal_clip_fraction = 0.2
 
 ##
 ## LOAD RESOURCES
@@ -113,6 +86,6 @@ if not args.no_grid:
 
 
 logger.info("Stitchng images")
-main(np_images, 0.2, 0.2, os.path.join(folder, 'stitched.png'))
+main(np_images, vertical_clip_fraction, horizontal_clip_fraction, os.path.join(folder, 'stitched.png'))
 
 logger.info("Finished, exiting...")
