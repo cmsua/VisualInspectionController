@@ -1,6 +1,7 @@
 import queue
 import threading
 import logging
+import os
 
 import cv2 as cv2
 from PIL import Image
@@ -9,6 +10,18 @@ logger = logging.getLogger('camera')
 
 class CameraWrapper():
   def __init__(self):
+    logging.info('Setting webcam values')
+    # Must disable auto focus before setting focus
+    if os.system('v4l2-ctl -c zoom_absolute=381,focus_automatic_continuous=0') is not 0:
+      logger.critical('Setting zoom and disabling auto focus failed')
+      return
+    if os.system('v4l2-ctl -c focus_absolute=90') is not 0:
+      logger.critical('Disabling focus failed')
+      return
+    if os.system('python3 ~/Desktop/cameractrls/cameractrls.py -c logitech_led1_mode=off') is not 0:
+      logger.critical('Disabling LED failed')
+      return
+
     self.cap = cv2.VideoCapture(0)
     if not self.cap or not self.cap.isOpened():
         logger.critical('Cannot open camera!')
