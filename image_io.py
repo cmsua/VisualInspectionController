@@ -82,7 +82,7 @@ def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
         for col_id, x in enumerate(range(x_start, x_end + x_inc, x_inc)):
             logger.debug(f'Loading image X{x}Y{y}.png')
             file = os.path.join(dir, 'raw', f'X{x}Y{y}.png')
-            image = cv2.cvtColor(cv2.imread(file), cv2.COLOR_BGR2RGB)
+            image = cv2.imread(file)
 
             if row_strip is None:
                 row_strip = np.zeros((cols, *image.shape), dtype=np.uint8)
