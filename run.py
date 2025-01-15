@@ -32,12 +32,12 @@ output_dir = 'Pictures'
 
 zoomed_in = False
 
-x_start = 0
-x_end = 190
+x_start = 50
+x_end = 230
 x_inc = 20 if zoomed_in else 45
 
-y_start = 45
-y_end = 205
+y_start = 40
+y_end = 200
 y_inc = 10 if zoomed_in else 25
 
 stabilize_delay = 1 # 2.2
