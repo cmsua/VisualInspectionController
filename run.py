@@ -38,11 +38,11 @@ x_inc = 20 if zoomed_in else 45
 
 y_start = 40
 y_end = 200
-y_inc = 10 if zoomed_in else 25
+y_inc = 10 if zoomed_in else 15
 
-stabilize_delay = 1 # 2.2
+stabilize_delay = 2.2
 
-stitched_scale = 16
+stitched_scale = 4
 
 skipped_points = [
   # (0, 45),

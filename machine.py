@@ -39,6 +39,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     # Iterate over a grid
     rows = len(range(y_start, y_end + y_inc, y_inc))
     cols = len(range(x_start, x_end + x_inc, x_inc))
+    
     for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching
         x_points = range(x_start, x_end + x_inc, x_inc)
@@ -46,6 +47,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
             x_points = reversed(x_points)
 
         for col_index, x in enumerate(x_points):
+            logger.info(f'Capturing image {row_index * cols + col_index} out of {rows * cols}')
             # Check for skipped points
             skip = False
             for point in skipped_points:
