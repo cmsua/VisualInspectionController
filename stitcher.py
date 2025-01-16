@@ -15,8 +15,8 @@ def compute_gradients(img):
     return grad_mag
 
 def find_best_overlap(imgA, imgB,
-                      min_overlap=10,
-                      max_overlap=None,
+                      min_overlap=1,
+                      max_overlap=20,
                       pixel_weight=0.5,
                       grad_weight=0.5):
     # Ensure same height
@@ -163,7 +163,6 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
     horz_clip = math.floor(total_image_shape[1]*horz_clip_fraction)
-
     rows = len(images)
     columns = len(images[0])
 

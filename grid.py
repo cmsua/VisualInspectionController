@@ -7,8 +7,8 @@ logger = logging.getLogger('stitcher')
 
 def create_grid(images, output_file, stitched_scale, x_start, x_inc, y_start, y_inc):
   logger.info('Creating Grid')
-  width = 4096 // stitched_scale
-  height = 2160 // stitched_scale
+  width = images[0][0].shape[1] // stitched_scale
+  height = images[0][0].shape[0] // stitched_scale
   total_width = width * len(images[0])
   total_height = height * len(images)
 
@@ -19,8 +19,6 @@ def create_grid(images, output_file, stitched_scale, x_start, x_inc, y_start, y_
       if captured is None:
         continue
       
-      machine_x = x_start + x_num * x_inc
-      machine_y = y_start + y_num * y_inc
       image_pos = (x_num * width, (len(images) - 1 - y_num) * height)
 
       segment = Image.fromarray(cv2.cvtColor(captured, cv2.COLOR_BGR2RGB), mode="RGB").resize((width, height))

@@ -15,12 +15,12 @@ from image_io import write_images, load_images_numpy
 ##
 output_dir = 'Pictures'
 
-x_start = 50
-x_end = 230
+x_start = 49
+x_end = 229
 x_inc = 45
 
-y_start = 40
-y_end = 200
+y_start = 43
+y_end = 193
 y_inc = 25
 
 stabilize_delay = 2.2
