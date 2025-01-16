@@ -29,8 +29,8 @@ stitched_scale = 4
 
 skipped_points = []
 
-vertical_clip_fraction = (1 - (5 / 10.5)) / 2
-horizontal_clip_fraction = (1 - (9 / 20.25)) / 2
+vertical_clip_fraction = (5 / 10.5) / 2
+horizontal_clip_fraction = (9 / 20.25) / 2
 
 ##
 ## LOAD RESOURCES

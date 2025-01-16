@@ -2,10 +2,10 @@ import logging
 import os
 import multiprocessing
 
-from memory_profiler import profile
 from PIL import Image
 import numpy as np
 import cv2
+import tqdm
 
 logger = logging.getLogger('image_io')
 
@@ -69,7 +69,6 @@ def load_images(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
 
     return images
 
-@profile
 def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
     logger.info(f'Loading to Numpy from {dir}')
 
@@ -77,6 +76,10 @@ def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
     cols = len(range(x_start, x_end + x_inc, x_inc))
     
     np_images = None
+    
+    total_images = len(range(y_start, y_end + y_inc, y_inc)) * len(range(x_start, x_end + x_inc, x_inc))
+    pbar = tqdm.tqdm(desc='Loading Images', total=total_images)
+
     for row_id, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         row_strip = None
         for col_id, x in enumerate(range(x_start, x_end + x_inc, x_inc)):
@@ -87,10 +90,13 @@ def load_images_numpy(dir, x_start, x_inc, x_end, y_start, y_inc, y_end):
             if row_strip is None:
                 row_strip = np.zeros((cols, *image.shape), dtype=np.uint8)
             row_strip[col_id] = np.asarray(image, dtype=np.uint8)
+            pbar.update()
             
         if np_images is None:
             np_images = np.zeros((rows, *row_strip.shape), dtype=np.uint8)
         np_images[row_id] = row_strip
-        logger.info(f'Loaded row {row_id}')
 
+        logger.debug(f'Loaded row {row_id}')
+        
+    pbar.close()
     return np_images
