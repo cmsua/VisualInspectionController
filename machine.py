@@ -40,7 +40,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     # Iterate over a grid
     rows = len(range(y_start, y_end + y_inc, y_inc))
     cols = len(range(x_start, x_end + x_inc, x_inc))
-    pbar = tqdm.tqdm(total=rows * cols)
+    pbar = tqdm.tqdm(desc="Capturing Images", total=rows * cols)
     
     for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching
@@ -49,7 +49,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
             x_points = reversed(x_points)
 
         for col_index, x in enumerate(x_points):
-            logger.info(f'Capturing image {row_index * cols + col_index} out of {rows * cols}')
+            logger.debug(f'Capturing image {row_index * cols + col_index} out of {rows * cols}')
             # Check for skipped points
             skip = False
             for point in skipped_points:
@@ -62,7 +62,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
                 continue
 
             # Move machine
-            logger.info(f'Moving to {x}, {y} (row: {row_index}, image captured: {col_index})')
+            logger.debug(f'Moving to {x}, {y} (row: {row_index}, image captured: {col_index})')
             printer.send_gcode(f'G1 X{x} Y{y} F12000')
             printer.send_gcode('M400')
 
