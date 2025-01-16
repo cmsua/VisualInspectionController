@@ -4,6 +4,7 @@ import time
 
 import moonrakerpy as moonpy
 import numpy as np
+import tqdm
 
 from camera import CameraWrapper
 
@@ -39,6 +40,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     # Iterate over a grid
     rows = len(range(y_start, y_end + y_inc, y_inc))
     cols = len(range(x_start, x_end + x_inc, x_inc))
+    pbar = tqdm.tqdm(total=rows * cols)
     
     for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching
@@ -56,11 +58,11 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
                     break
 
             if skip:
-                logger.info(f'Skipping point {x}, {y}')
+                logger.debug(f'Skipping point {x}, {y}')
                 continue
 
             # Move machine
-            logger.info(f'Moving to {x}, {y} out of {x_end + x_inc}, {y_end + y_inc} (row: {row_index}, image captured: {col_index})')
+            logger.info(f'Moving to {x}, {y} (row: {row_index}, image captured: {col_index})')
             printer.send_gcode(f'G1 X{x} Y{y} F12000')
             printer.send_gcode('M400')
 
@@ -81,7 +83,11 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
 
             images[row_index][col_index_actual] = frame
 
+            pbar.update()
+
         forward = not forward
+
+    pbar.close()
 
     seconds = (datetime.datetime.now() - start_time).seconds
     logger.info(f'Finished in {seconds}s')
