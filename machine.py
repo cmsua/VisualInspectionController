@@ -8,6 +8,9 @@ import tqdm
 
 from camera import CameraWrapper
 
+x_max = 240
+y_max = 400
+
 logger = logging.getLogger('machine')
 
 def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points=[]):
@@ -60,6 +63,11 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
             if skip:
                 logger.debug(f'Skipping point {x}, {y}')
                 continue
+
+            if x > x_max:
+                raise ValueError(f'x > x_max ({x} > {x_max})')
+            if y > y_max:
+                raise ValueError(f'y > y_max ({x} > {x_max})')
 
             # Move machine
             logger.debug(f'Moving to {x}, {y} (row: {row_index}, image captured: {col_index})')
