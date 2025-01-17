@@ -34,7 +34,7 @@ def create_grid(images, output_file, stitched_scale, x_start, x_inc, y_start, y_
       machine_y = y_start + y_num * y_inc
       image_pos = (x_num * width, (len(images) - 1 - y_num) * height)
       
-      draw.text(image_pos, f'{counter} - X{machine_x}Y{machine_y}', (255,255,255), font=font)
+      draw.text(image_pos, f'({y_num}, {x_num}) - {counter} - X{machine_x}Y{machine_y}', (255,255,255), font=font)
       counter = counter + 1
 
   logger.info('Saving Grid')
