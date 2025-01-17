@@ -59,14 +59,14 @@ if __name__ == '__main__':
       all_subdirs = [os.path.join(output_dir, d) for d in os.listdir(output_dir)]
       folder = max(all_subdirs, key=os.path.getmtime)
 
-      logger.info(f"Loading images from folder {folder}")
+      logger.info(f'Loading images from folder {folder}')
       np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
     elif args.dir:
       folder = args.dir
-      logger.info(f"Loading images from folder {folder}")
+      logger.info(f'Loading images from folder {folder}')
       np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
     else:
-      logger.info("Scanning images")
+      logger.info('Scanning images')
       start_time = datetime.datetime.now()
       np_images = create_images(x_start, x_inc, y_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
 
@@ -74,20 +74,20 @@ if __name__ == '__main__':
       folder = os.path.join(output_dir, str(start_time))
 
       # Saving images
-      logger.info("Saving images")
+      logger.info('Saving images')
       write_images(np_images, folder, x_start, x_inc, y_start, y_inc)
 
-    logger.info("Loaded images")
+    logger.info('Loaded images')
 
     ##
     ## RUN ANALYSIS
     ##
     if not args.no_grid:
-      logger.info("Creating grid")
+      logger.info('Creating grid')
       create_grid(np_images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
 
 
-    logger.info("Stitchng images")
+    logger.info('Stitchng images')
     main(np_images, vertical_clip_fraction, horizontal_clip_fraction, os.path.join(folder, 'stitched.png'))
 
-    logger.info("Finished, exiting...")
+    logger.info('Finished, exiting...')

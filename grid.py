@@ -21,7 +21,7 @@ def create_grid(images, output_file, stitched_scale, x_start, x_inc, y_start, y_
       
       image_pos = (x_num * width, (len(images) - 1 - y_num) * height)
 
-      segment = Image.fromarray(cv2.cvtColor(captured, cv2.COLOR_BGR2RGB), mode="RGB").resize((width, height))
+      segment = Image.fromarray(cv2.cvtColor(captured, cv2.COLOR_BGR2RGB), mode='RGB').resize((width, height))
       image.paste(segment, image_pos)
 
   draw = ImageDraw.Draw(image)

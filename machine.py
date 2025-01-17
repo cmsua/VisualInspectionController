@@ -40,7 +40,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     # Iterate over a grid
     rows = len(range(y_start, y_end + y_inc, y_inc))
     cols = len(range(x_start, x_end + x_inc, x_inc))
-    pbar = tqdm.tqdm(desc="Capturing Images", total=rows * cols)
+    pbar = tqdm.tqdm(desc='Capturing Images', total=rows * cols)
     
     for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching

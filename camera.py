@@ -62,7 +62,7 @@ class CameraWrapper():
     return segment
 
   def close(self):
-    logger.info("Closing...")
+    logger.info('Closing...')
     self.run = False
     self.thread.join()
     self.cap.release()

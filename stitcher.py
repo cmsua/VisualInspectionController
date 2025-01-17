@@ -20,7 +20,7 @@ def find_best_overlap(imgA, imgB,
                       pixel_weight=0.5,
                       grad_weight=0.5):
     # Ensure same height
-    assert imgA.shape[0] == imgB.shape[0], "Images must have the same height for horizontal stitching."
+    assert imgA.shape[0] == imgB.shape[0], 'Images must have the same height for horizontal stitching.'
     
     # Convert to grayscale if needed
     if len(imgA.shape) == 3:
@@ -84,7 +84,7 @@ def find_best_vertical_overlap(imgTop, imgBottom,
                                pixel_weight=0.5,
                                grad_weight=0.5):
     # Ensure same width
-    assert imgTop.shape[1] == imgBottom.shape[1], "Images must have the same width for vertical stitching."
+    assert imgTop.shape[1] == imgBottom.shape[1], 'Images must have the same width for vertical stitching.'
 
     # Convert to grayscale if needed
     if len(imgTop.shape) == 3:
@@ -166,7 +166,7 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
     rows = len(images)
     columns = len(images[0])
 
-    logger.debug("Clipping images")
+    logger.debug(f'Clipping images, from {total_image_shape} to {vert_clip}, {horz_clip}')
     pbar = tqdm.tqdm(desc='Clipping Images', total=rows*columns)
 
     clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
@@ -187,22 +187,22 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
 
     center_x = len(clipped_images) // 2
     center_y = len(clipped_images[0]) // 2
-    logger.info(f"Using center {center_x}, {center_y}")
+    logger.info(f'Using center {center_x}, {center_y}')
 
-    logger.info("Finding best overlaps")
+    logger.info('Finding best overlaps')
     # Compute horizontal overlap using the first two images in the top row
     horiz_overlap = find_best_overlap(clipped_images[center_x][center_y], clipped_images[center_x][center_y + 1])
-    logger.info(f"Found horizontal overlap {horiz_overlap}")
+    logger.info(f'Found horizontal overlap {horiz_overlap}')
 
     # Compute vertical overlap using the first two images in the first column
     vert_overlap = find_best_vertical_overlap(clipped_images[center_x][center_y], clipped_images[center_x + 1][center_y])
-    logger.info(f"Found vertical overlap {vert_overlap}")
+    logger.info(f'Found vertical overlap {vert_overlap}')
 
-    logger.debug(f"Stitching {rows} rows")
+    logger.debug(f'Stitching {rows} rows')
     # Now use horiz_overlap for stitching each row horizontally
     stitched_rows = None
     for row_index in tqdm.tqdm(range(rows), desc='Stitching Rows'):
-        logger.debug(f"Stitching row {row_index}")
+        logger.debug(f'Stitching row {row_index}')
         row_strip = clipped_images[row_index][0]
         for col_index in range(1, columns):
             # Use the determined horizontal overlap width
@@ -218,15 +218,15 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
     # Memory cleanup
     clipped_images = None
 
-    logger.debug("Stitching to final image")
+    logger.debug('Stitching to final image')
     # Now stitch the rows together vertically using the determined vert_overlap
     final_image = stitched_rows[0]
     for r in tqdm.tqdm(range(1, rows), desc='Stitching Columns'):
-        logger.debug(f"Stitching column {r}")
+        logger.debug(f'Stitching column {r}')
         final_image = blend_images(final_image,
                                    stitched_rows[r],
                                    overlap_width=vert_overlap,
                                    direction='vertical')
         
-    logger.info("Saving...")
+    logger.info('Saving...')
     cv2.imwrite(output_file, final_image)
