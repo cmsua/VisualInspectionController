@@ -149,7 +149,7 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
         alpha = np.linspace(1, 0, overlap_width).reshape(1, -1, 1)
         blended_region = alpha * overlapA + (1 - alpha) * overlapB
         
-        stitched = np.concatenate([imgA[:, :-overlap_width], blended_region, imgB[:, overlap_width:]], axis=1)
+        stitched = np.concatenate([imgA[:, :-overlap_width], blended_region, imgB[:, overlap_width:]], axis=1).astype(np.uint8)
         return stitched
     else:
         # Vertical blending
@@ -159,7 +159,7 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
         alpha = np.linspace(1, 0, overlap_width).reshape(-1, 1, 1)
         blended_region = alpha * overlapA + (1 - alpha) * overlapB
         
-        stitched = np.concatenate([imgA[:-overlap_width, :], blended_region, imgB[overlap_width:, :]], axis=0)
+        stitched = np.concatenate([imgA[:-overlap_width, :], blended_region, imgB[overlap_width:, :]], axis=0).astype(np.uint8)
         return stitched
 
 def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_dir: str, write_intermediates: bool = False):
@@ -234,7 +234,7 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_di
                                    overlap_width=vert_overlap,
                                    direction='vertical')
         
-    logger.info('Saving...')
+    logger.debug('Saving...')
     if write_intermediates:
         cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)
 
