@@ -1,9 +1,12 @@
 import math
 import logging
+import os
 
 import numpy as np
 import cv2
 import tqdm
+
+from grid import create_grid
 
 logger = logging.getLogger('main')
 
@@ -159,14 +162,14 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
         stitched = np.concatenate([imgA[:-overlap_width, :], blended_region, imgB[overlap_width:, :]], axis=0)
         return stitched
 
-def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
+def main(images, vert_clip_fraction, horz_clip_fraction, output_dir):
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
     horz_clip = math.floor(total_image_shape[1]*horz_clip_fraction)
     rows = len(images)
     columns = len(images[0])
 
-    logger.debug(f'Clipping images, from {total_image_shape} to {vert_clip}, {horz_clip}')
+    logger.debug(f'Clipping images, from {total_image_shape} to {vert_clip}, {horz_clip} (fractions {vert_clip_fraction}, {horz_clip_fraction})')
     pbar = tqdm.tqdm(desc='Clipping Images', total=rows*columns)
 
     clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
@@ -181,6 +184,8 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
             pbar.update()
     pbar.close()
 
+    logger.debug(f'Clipped image shape: {clipped_images[0][0].shape}')
+    create_grid(clipped_images, os.path.join(output_dir, 'stitcher-clipped.png'), 4)
 
     # Memory cleanup
     images = None
@@ -229,4 +234,4 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_file):
                                    direction='vertical')
         
     logger.info('Saving...')
-    cv2.imwrite(output_file, final_image)
+    cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)

@@ -17,11 +17,11 @@ output_dir = 'Pictures'
 
 x_start = 49
 x_end = 229
-x_inc = 45
+x_inc = 30 #45
 
 y_start = 43
 y_end = 193
-y_inc = 25
+y_inc = 10 #25
 
 stabilize_delay = 2.2
 
@@ -29,8 +29,8 @@ stitched_scale = 4
 
 skipped_points = []
 
-vertical_clip_fraction = (5 / 10.5) / 2
-horizontal_clip_fraction = (9 / 20.25) / 2
+vertical_clip_fraction = (9 / 20.25) / 2
+horizontal_clip_fraction = (5 / 10.5) / 2
 
 ##
 ## LOAD RESOURCES
@@ -88,6 +88,6 @@ if __name__ == '__main__':
 
 
     logger.info('Stitchng images')
-    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, os.path.join(folder, 'stitched.png'))
+    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, folder)
 
     logger.info('Finished, exiting...')
