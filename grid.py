@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 logger = logging.getLogger('stitcher')
 
 def create_grid(images, output_file: str, stitched_scale: int, x_start: int = None, x_inc: int = None, y_start: int = None, y_inc: int = None):
-  logger.info('Creating Grid')
+  logger.debug('Creating Grid')
   width = images[0][0].shape[1] // stitched_scale
   height = images[0][0].shape[0] // stitched_scale
   total_width = width * len(images[0])
@@ -21,7 +21,8 @@ def create_grid(images, output_file: str, stitched_scale: int, x_start: int = No
       
       image_pos = (x_num * width, (len(images) - 1 - y_num) * height)
 
-      segment = Image.fromarray(cv2.cvtColor(captured, cv2.COLOR_BGR2RGB), mode='RGB').resize((width, height))
+      segment = cv2.resize(cv2.cvtColor(captured, cv2.COLOR_BGR2RGB), (width, height))
+      segment = Image.fromarray(segment, mode='RGB')
       image.paste(segment, image_pos)
 
   draw = ImageDraw.Draw(image)
@@ -38,8 +39,8 @@ def create_grid(images, output_file: str, stitched_scale: int, x_start: int = No
         draw.text(image_pos, f'({y_num}, {x_num}) - {counter} - X{machine_x}Y{machine_y}', (255,255,255), font=font)
       else:
         draw.text(image_pos, f'({y_num}, {x_num}) - {counter}', (255,255,255), font=font)
-        
+
       counter = counter + 1
 
-  logger.info('Saving Grid')
+  logger.debug('Saving Grid')
   image.save(output_file)
