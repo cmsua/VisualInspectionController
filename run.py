@@ -8,7 +8,7 @@ import tqdm.contrib.logging
 from stitcher import main
 from grid import create_grid
 from machine import create_images
-from image_io import write_images, load_images_numpy
+from image_io import write_images, load_images
 
 ##
 ## SETTINGS
@@ -60,11 +60,11 @@ if __name__ == '__main__':
       folder = max(all_subdirs, key=os.path.getmtime)
 
       logger.info(f'Loading images from folder {folder}')
-      np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
+      np_images = load_images(folder)
     elif args.dir:
       folder = args.dir
       logger.info(f'Loading images from folder {folder}')
-      np_images = load_images_numpy(folder, x_start, x_inc, x_end, y_start, y_inc, y_end)
+      np_images = load_images(folder)
     else:
       logger.info('Scanning images')
       start_time = datetime.datetime.now()
