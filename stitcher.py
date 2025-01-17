@@ -18,8 +18,8 @@ def compute_gradients(img):
     return grad_mag
 
 def find_best_overlap(imgA, imgB,
-                      min_overlap=1,
-                      max_overlap=20,
+                      min_overlap=10,
+                      max_overlap=400,
                       pixel_weight=0.5,
                       grad_weight=0.5):
     # Ensure same height
@@ -162,7 +162,7 @@ def blend_images(imgA, imgB, overlap_width, direction='horizontal'):
         stitched = np.concatenate([imgA[:-overlap_width, :], blended_region, imgB[overlap_width:, :]], axis=0)
         return stitched
 
-def main(images, vert_clip_fraction, horz_clip_fraction, output_dir):
+def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_dir: str, write_intermediates: bool = False):
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
     horz_clip = math.floor(total_image_shape[1]*horz_clip_fraction)
@@ -180,12 +180,13 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_dir):
                                      bottom_clip=vert_clip,
                                      left_clip=horz_clip,
                                      right_clip=horz_clip)
-            clipped_images[row_num][col_num] = clipped_img
+            clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
     pbar.close()
 
     logger.debug(f'Clipped image shape: {clipped_images[0][0].shape}')
-    create_grid(clipped_images, os.path.join(output_dir, 'stitcher-clipped.png'), 4)
+    if write_intermediates:
+        create_grid(clipped_images, os.path.join(output_dir, 'stitcher-clipped.png'), 4)
 
     # Memory cleanup
     images = None
@@ -234,4 +235,7 @@ def main(images, vert_clip_fraction, horz_clip_fraction, output_dir):
                                    direction='vertical')
         
     logger.info('Saving...')
-    cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)
+    if write_intermediates:
+        cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)
+
+    np.save(os.path.join(output_dir, 'stitcher-out.npy'), final_image)

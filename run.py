@@ -16,12 +16,12 @@ from image_io import write_images, load_images
 output_dir = 'Pictures'
 
 x_start = 49
-x_end = 229
-x_inc = 30 #45
+x_end = 224
+x_inc = 25 #45
 
 y_start = 43
 y_end = 193
-y_inc = 10 #25
+y_inc = 15 #25
 
 stabilize_delay = 2.2
 
@@ -68,14 +68,14 @@ if __name__ == '__main__':
     else:
       logger.info('Scanning images')
       start_time = datetime.datetime.now()
-      np_images = create_images(x_start, x_inc, y_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
+      np_images = create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
 
       # Make Dirs
       folder = os.path.join(output_dir, str(start_time))
 
       # Saving images
       logger.info('Saving images')
-      write_images(np_images, folder, x_start, x_inc, y_start, y_inc)
+      write_images(np_images, folder, x_start, x_inc, y_start, y_inc, args.verbose)
 
     logger.info('Loaded images')
 
@@ -88,6 +88,6 @@ if __name__ == '__main__':
 
 
     logger.info('Stitchng images')
-    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, folder)
+    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, folder, args.verbose)
 
     logger.info('Finished, exiting...')
