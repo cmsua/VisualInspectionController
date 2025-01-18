@@ -18,6 +18,21 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     logger.info('Opening printer...')
     printer = moonpy.MoonrakerPrinter('http://localhost')
 
+    # Check for activity
+    if printer.query_status() is not "ready":
+        logger.warning('Printer status is not "ready", restarting...')
+        printer.post('/printer/restart')
+        time.sleep(3)
+
+        logger.debug('Restarting printer firmware')
+        printer.post('/printer/firmware_restart')
+        time.sleep(3)
+
+        # Make sure it worked
+        if printer.query_status() is not "ready":
+            logger.critical('Printer failed to come online. Exiting.')
+            raise RuntimeError('Printer failed to initialize')
+
     # Open Webcam
     logger.info('Opening webcam...')
     camera = CameraWrapper()
