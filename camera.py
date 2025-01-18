@@ -10,6 +10,9 @@ logger = logging.getLogger('camera')
 
 class CameraWrapper():
   def __init__(self):
+    logger.debug('Killing Cheese if open')
+    os.system('killall cheese')
+
     logging.info('Setting webcam values')
     # Must disable auto focus before setting focus
     if os.system('v4l2-ctl -c zoom_absolute=381,focus_automatic_continuous=0') is not 0:
