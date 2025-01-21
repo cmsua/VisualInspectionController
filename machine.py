@@ -13,23 +13,26 @@ y_max = 400
 
 logger = logging.getLogger('machine')
 
+def get_status(printer: moonpy.MoonrakerPrinter) -> str:
+    return printer.get('/server/info')['result']['klippy_state']
+
 def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points=[]):
     # Open Printer
     logger.info('Opening printer...')
     printer = moonpy.MoonrakerPrinter('http://localhost')
 
     # Check for activity
-    if printer.query_status() is not "ready":
+    if get_status(printer) != "ready":
         logger.warning('Printer status is not "ready", restarting...')
         printer.post('/printer/restart')
-        time.sleep(3)
+        time.sleep(1)
 
         logger.debug('Restarting printer firmware')
         printer.post('/printer/firmware_restart')
-        time.sleep(3)
+        time.sleep(1)
 
         # Make sure it worked
-        if printer.query_status() is not "ready":
+        if get_status(printer) != "ready":
             logger.critical('Printer failed to come online. Exiting.')
             raise RuntimeError('Printer failed to initialize')
 
