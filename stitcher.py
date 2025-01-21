@@ -18,8 +18,8 @@ def compute_gradients(img):
     return grad_mag
 
 def find_best_overlap(imgA, imgB,
-                      min_overlap=10,
-                      max_overlap=400,
+                      min_overlap=1,
+                      max_overlap=10,
                       pixel_weight=0.5,
                       grad_weight=0.5):
     # Ensure same height
