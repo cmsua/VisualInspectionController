@@ -185,7 +185,7 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_di
     pbar.close()
 
     logger.debug(f'Clipped image shape: {clipped_images[0][0].shape}')
-    if write_intermediates:
+    if write_intermediates and output_dir is not None:
         create_grid(clipped_images, os.path.join(output_dir, 'stitcher-clipped.png'), 4)
 
     # Memory cleanup
@@ -234,8 +234,10 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_di
                                    overlap_width=vert_overlap,
                                    direction='vertical')
         
-    logger.debug('Saving...')
-    if write_intermediates:
-        cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)
+    if output_dir is not None:
+        logger.debug('Saving...')
+        if write_intermediates:
+            cv2.imwrite(os.path.join(output_dir, 'stitcher-out.png'), final_image)
 
-    np.save(os.path.join(output_dir, 'stitcher-out.npy'), final_image)
+        np.save(os.path.join(output_dir, 'stitcher-out.npy'), final_image)
+    return final_image
