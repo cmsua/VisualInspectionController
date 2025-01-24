@@ -17,11 +17,11 @@ output_dir = 'Pictures'
 
 x_start = 49
 x_end = 224
-x_inc = 25 #45
+x_inc = 25
 
 y_start = 43
 y_end = 193
-y_inc = 15 #25
+y_inc = 15
 
 stabilize_delay = 2.2
 
@@ -29,8 +29,8 @@ stitched_scale = 4
 
 skipped_points = []
 
-vertical_clip_fraction = (9 / 20.25) / 2 * 1.1
-horizontal_clip_fraction = (5 / 10.5) / 2 * 1.2
+vertical_clip_fraction = (11.25 / 20.25) / 2
+horizontal_clip_fraction = (5.5 / 10.5) / 2
 
 ##
 ## LOAD RESOURCES
