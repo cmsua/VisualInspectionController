@@ -29,7 +29,7 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
 
         logger.debug('Restarting printer firmware')
         printer.post('/printer/firmware_restart')
-        time.sleep(1)
+        time.sleep(4)
 
         # Make sure it worked
         if get_status(printer) != "ready":
