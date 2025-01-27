@@ -1,0 +1,5 @@
+{
+  "accessibility.signals.terminalBell": {
+    "sound": "on"
+  }
+}

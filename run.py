@@ -2,6 +2,7 @@ import logging
 import os
 import datetime
 import argparse
+import time
 
 import tqdm.contrib.logging 
 
@@ -90,4 +91,8 @@ if __name__ == '__main__':
     logger.info('Stitchng images')
     main(np_images, vertical_clip_fraction, horizontal_clip_fraction, folder, args.verbose)
 
+    # Beep
     logger.info('Finished, exiting...')
+    for i in range(5):
+      print('\a')
+      time.sleep(1)
