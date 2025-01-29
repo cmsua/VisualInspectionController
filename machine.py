@@ -1,68 +1,101 @@
 import logging
 import datetime
 import time
+import os
 
 import moonrakerpy as moonpy
 import numpy as np
 import tqdm
+import cv2
 
 from camera import CameraWrapper
 
-x_max = 240
-y_max = 400
+# CV2 Params
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+parameters = cv2.aruco.DetectorParameters()
+detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
+if not os.path.exists('aruco.png'):
+    marker_image = cv2.aruco.generateImageMarker(aruco_dict, 0, 200)
+    cv2.imwrite('aruco.png', marker_image)
+
+# Logger
 logger = logging.getLogger('machine')
 
+# Get status (if restart needed)
 def get_status(printer: moonpy.MoonrakerPrinter) -> str:
     return printer.get('/server/info')['result']['klippy_state']
 
-def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points=[]):
-    # Open Printer
-    logger.info('Opening printer...')
-    printer = moonpy.MoonrakerPrinter('http://localhost')
-
+# Wait for printer to come online
+def wait_for_printer(printer: moonpy.MoonrakerPrinter) -> None:
     # Check for activity
     if get_status(printer) != "ready":
         logger.warning('Printer status is not "ready", restarting...')
         printer.post('/printer/restart')
-        time.sleep(1)
+        time.sleep(3)
 
-        logger.debug('Restarting printer firmware')
-        printer.post('/printer/firmware_restart')
-        time.sleep(4)
-
-        # Make sure it worked
         if get_status(printer) != "ready":
-            logger.critical('Printer failed to come online. Exiting.')
-            raise RuntimeError('Printer failed to initialize')
+            logger.debug('Restarting printer firmware')
+            printer.post('/printer/firmware_restart')
+            time.sleep(4)
+
+            # Make sure it worked
+            if get_status(printer) != "ready":
+                logger.critical('Printer failed to come online. Exiting.')
+                raise RuntimeError('Printer failed to initialize')
+
+def home_printer(printer: moonpy.MoonrakerPrinter, camera: CameraWrapper, stabilize_delay: float) -> None:
+    logger.info('Homing Printer')
+
+    # Mechanical homing
+    logger.debug('Homing X+Y mechanically')
+    printer.send_gcode('G28 X Y')
+    printer.send_gcode('M400')
+
+    return
+
+    # Move to Aruco location
+    logger.debug('Moving to Aruco marker')
+    printer.send_gcode('G1 X0 Y0 F6000')
+    printer.send_gcode('M400')
+    time.sleep(stabilize_delay)
+
+    # Take picture
+    logger.debug('Capturing Image')
+    image = camera.get_image()
+    
+    # Find markers
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    corners, ids, rejected = detector.detectMarkers(gray)
+    cv2.aruco.drawDetectedMarkers(image, corners, ids)
+    cv2.imshow('Detected Markers', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def create_images(x_start: int, x_inc: int, x_end: int, y_start: int, y_inc: int, y_end: int, stabilize_delay: float, skipped_points=[]) -> None:
+    # Open Printer
+    logger.info('Opening printer...')
+    printer = moonpy.MoonrakerPrinter('http://localhost')
+    wait_for_printer(printer)
 
     # Open Webcam
     logger.info('Opening webcam...')
     camera = CameraWrapper()
 
-    ##
-    ## HOMING
-    ##
-
-    logger.info('Homing X+Y')
-    printer.send_gcode('G28')
-    printer.send_gcode('M400')
+    home_printer(printer, camera, stabilize_delay)
 
     ##
     ## START CAPTURE
     ##
-
-
     start_time = datetime.datetime.now()
-
     images = None
 
-    forward = True
     # Iterate over a grid
     rows = len(range(y_start, y_end + y_inc, y_inc))
     cols = len(range(x_start, x_end + x_inc, x_inc))
     pbar = tqdm.tqdm(desc='Capturing Images', total=rows * cols)
     
+    forward = True
     for row_index, y in enumerate(range(y_start, y_end + y_inc, y_inc)):
         # Handle direction switching
         x_points = range(x_start, x_end + x_inc, x_inc)
@@ -81,11 +114,6 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
             if skip:
                 logger.debug(f'Skipping point {x}, {y}')
                 continue
-
-            if x > x_max:
-                raise ValueError(f'x > x_max ({x} > {x_max})')
-            if y > y_max:
-                raise ValueError(f'y > y_max ({x} > {x_max})')
 
             # Move machine
             logger.debug(f'Moving to {x}, {y} (row: {row_index}, image captured: {col_index})')
@@ -120,10 +148,4 @@ def create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay,
     logger.info(f'Finished in {seconds - (len(images) * len(images[0]) * stabilize_delay)}s (no sleep)')
 
     camera.close()
-
-
-    # Disable Motors
-    # printer.send_gcode('M18')
-
-
     return images

@@ -44,7 +44,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-r', '--reuse', action='store_true', help='Reuse the latest folder')
 parser.add_argument('-d', '--dir', type=str, help='Load a specific folder')
-parser.add_argument('-g', '--no-grid', action='store_true', help='Disable raw grid creation')
+parser.add_argument('-g', '--grid', action='store_true', help='Enable raw grid creation')
 parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     ##
     ## RUN ANALYSIS
     ##
-    if not args.no_grid:
+    if args.grid:
       logger.info('Creating grid')
       create_grid(np_images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
 
