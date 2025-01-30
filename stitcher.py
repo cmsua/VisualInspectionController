@@ -81,20 +81,27 @@ def find_best_vertical_overlap(imgTop, imgBottom,
                                max_overlap=None,
                                pixel_weight=0.5,
                                grad_weight=0.5):
-    """Find the best vertical overlap between imgTop and imgBottom."""
-    # Ensure same width
-    assert imgTop.shape[1] == imgBottom.shape[1], \
-        'Images must have the same width for vertical stitching.'
+    """
+    Find the best vertical overlap between imgTop and imgBottom
+    by cropping both to their common width.
+    """
+
+    # 1. Determine common width
+    common_width = min(imgTop.shape[1], imgBottom.shape[1])
+
+    # 2. Crop both images to the same (common) width
+    imgTop_cropped = imgTop[:, :common_width]
+    imgBottom_cropped = imgBottom[:, :common_width]
 
     # Convert to grayscale if needed
-    if len(imgTop.shape) == 3:
-        grayTop = cv2.cvtColor(imgTop, cv2.COLOR_BGR2GRAY)
+    if len(imgTop_cropped.shape) == 3:
+        grayTop = cv2.cvtColor(imgTop_cropped, cv2.COLOR_BGR2GRAY)
     else:
-        grayTop = imgTop.astype(np.uint8)
-    if len(imgBottom.shape) == 3:
-        grayBottom = cv2.cvtColor(imgBottom, cv2.COLOR_BGR2GRAY)
+        grayTop = imgTop_cropped.astype(np.uint8)
+    if len(imgBottom_cropped.shape) == 3:
+        grayBottom = cv2.cvtColor(imgBottom_cropped, cv2.COLOR_BGR2GRAY)
     else:
-        grayBottom = imgBottom.astype(np.uint8)
+        grayBottom = imgBottom_cropped.astype(np.uint8)
 
     # Compute gradients
     gradTop = compute_gradients(grayTop)
@@ -103,23 +110,31 @@ def find_best_vertical_overlap(imgTop, imgBottom,
     hTop, _ = grayTop.shape
     hBottom, _ = grayBottom.shape
 
+    # If max_overlap is None, use a heuristic
     if max_overlap is None:
-        max_overlap = min(hTop, hBottom) // 2  # heuristic
+        max_overlap = min(hTop, hBottom) // 2
 
     best_score = float('inf')
-    best_overlap = 1  # fallback
+    best_overlap = min_overlap
 
     # Scan possible overlaps
     for overlap in range(min_overlap, max_overlap + 1):
+        # Bottom strip of top image
         stripTop = grayTop[hTop - overlap:, :]
         gradStripTop = gradTop[hTop - overlap:, :]
 
+        # Top strip of bottom image
         stripBottom = grayBottom[:overlap, :]
         gradStripBottom = gradBottom[:overlap, :]
 
-        pixel_diff = np.mean(np.abs(stripTop.astype(np.float32) - stripBottom.astype(np.float32)))
+        # Compute pixel difference
+        pixel_diff = np.mean(
+            np.abs(stripTop.astype(np.float32) - stripBottom.astype(np.float32))
+        )
+        # Compute gradient difference
         grad_diff = np.mean(np.abs(gradStripTop - gradStripBottom))
 
+        # Weighted score
         score = pixel_weight * pixel_diff + grad_weight * grad_diff
 
         if score < best_score:
