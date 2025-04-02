@@ -46,6 +46,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-r', '--reuse', action='store_true', help='Reuse the latest folder')
 parser.add_argument('-d', '--dir', type=str, help='Load a specific folder')
 parser.add_argument('-g', '--grid', action='store_true', help='Enable raw grid creation')
+parser.add_argument('-s', '--silent', action='store_true', help='Disable beeping when done')
 parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
 
@@ -94,6 +95,7 @@ if __name__ == '__main__':
 
     # Beep
     logger.info('Finished, exiting...')
-    for i in range(5):
-      print('\a')
-      time.sleep(1)
+    if not args.silent:
+      for i in range(5):
+        print('\a')
+        time.sleep(1)
