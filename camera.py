@@ -32,12 +32,12 @@ class CameraWrapper():
       return
 
     # Set gain
-    if os.system('v4l2-ctl -c gain=16')is not 0:
+    if os.system('v4l2-ctl -c gain=16') is not 0:
       logger.critical('Setting gain failed')
       return
 
     # Set saturation
-    if os.system('v4l2-ctl -c saturation=102')is not 0:
+    if os.system('v4l2-ctl -c saturation=102') is not 0:
       logger.critical('Setting saturation failed')
       return
 

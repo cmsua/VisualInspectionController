@@ -17,21 +17,22 @@ from image_io import write_images, load_images
 output_dir = 'Pictures'
 
 x_start = 49
-x_end = 224
-x_inc = 25
+x_end = 225
+x_inc = 22
 
 y_start = 43
-y_end = 193
-y_inc = 15
+y_end = 186
+# y_end = 56
+y_inc = 13
 
 stabilize_delay = 2.2
 
-stitched_scale = 4
+stitched_scale = 1
 
 skipped_points = []
 
-vertical_clip_fraction = (11.25 / 20.25) / 2
-horizontal_clip_fraction = (5.5 / 10.5) / 2
+vertical_clip_fraction = .265
+horizontal_clip_fraction = .3
 
 ##
 ## LOAD RESOURCES

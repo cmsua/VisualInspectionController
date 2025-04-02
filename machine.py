@@ -52,25 +52,9 @@ def home_printer(printer: moonpy.MoonrakerPrinter, camera: CameraWrapper, stabil
     printer.send_gcode('G28 X Y')
     printer.send_gcode('M400')
 
+    printer.send_gcode('G90')
+
     return
-
-    # Move to Aruco location
-    logger.debug('Moving to Aruco marker')
-    printer.send_gcode('G1 X0 Y0 F6000')
-    printer.send_gcode('M400')
-    time.sleep(stabilize_delay)
-
-    # Take picture
-    logger.debug('Capturing Image')
-    image = camera.get_image()
-    
-    # Find markers
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    corners, ids, rejected = detector.detectMarkers(gray)
-    cv2.aruco.drawDetectedMarkers(image, corners, ids)
-    cv2.imshow('Detected Markers', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 def create_images(x_start: int, x_inc: int, x_end: int, y_start: int, y_inc: int, y_end: int, stabilize_delay: float, skipped_points=[]) -> None:
     # Open Printer
