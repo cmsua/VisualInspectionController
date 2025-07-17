@@ -17,12 +17,13 @@ from image_io import write_images, load_images
 output_dir = 'Pictures'
 
 x_start = 49
-x_end = 224
-x_inc = 25
+x_end = 225
+x_inc = 22
 
 y_start = 43
-y_end = 193
-y_inc = 15
+y_end = 186
+# y_end = 56
+y_inc = 13
 
 positive_threshold = 50
 negative_threshold = 110
@@ -30,12 +31,12 @@ kernel_size = 363
 
 stabilize_delay = 2.2
 
-stitched_scale = 4
+stitched_scale = 1
 
 skipped_points = []
 
-vertical_clip_fraction = (11.25 / 20.25) / 2
-horizontal_clip_fraction = (5.5 / 10.5) / 2
+vertical_clip_fraction = .265
+horizontal_clip_fraction = .3
 
 ##
 ## LOAD RESOURCES
@@ -49,6 +50,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-r', '--reuse', action='store_true', help='Reuse the latest folder')
 parser.add_argument('-d', '--dir', type=str, help='Load a specific folder')
 parser.add_argument('-g', '--grid', action='store_true', help='Enable raw grid creation')
+parser.add_argument('-s', '--silent', action='store_true', help='Disable beeping when done')
 parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
 parser.add_argument('-b', '--baseline_path', type=str, default=None, help='Baseline board image paths. ' + \
@@ -105,6 +107,7 @@ if __name__ == '__main__':
 
     # Beep
     logger.info('Finished, exiting...')
-    for i in range(5):
-      print('\a')
-      time.sleep(1)
+    if not args.silent:
+      for i in range(5):
+        print('\a')
+        time.sleep(1)
