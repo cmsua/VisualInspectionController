@@ -6,7 +6,7 @@ import time
 
 import tqdm.contrib.logging 
 
-from stitcher import main
+from non_stitch_prepro import main
 from grid import create_grid
 from machine import create_images
 from image_io import write_images, load_images
@@ -24,6 +24,10 @@ y_start = 43
 y_end = 186
 # y_end = 56
 y_inc = 13
+
+positive_threshold = 50
+negative_threshold = 110
+kernel_size = 363
 
 stabilize_delay = 2.2
 
@@ -49,6 +53,8 @@ parser.add_argument('-g', '--grid', action='store_true', help='Enable raw grid c
 parser.add_argument('-s', '--silent', action='store_true', help='Disable beeping when done')
 parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
+parser.add_argument('-b', '--baseline_path', type=str, default=None, help='Baseline board image paths. ' + \
+                    'Only use if saving baseline boards.')
 
 if __name__ == '__main__':
   args = parser.parse_args()
@@ -73,8 +79,12 @@ if __name__ == '__main__':
       start_time = datetime.datetime.now()
       np_images = create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
 
-      # Make Dirs
-      folder = os.path.join(output_dir, str(start_time))
+      if args.baseline_path is not None:
+        # Make Dirs for baseline path
+        folder = os.path.join(output_dir, args.baseline_path)
+      else:
+        # Make Dirs
+        folder = os.path.join(output_dir, str(start_time))
 
       # Saving images
       logger.info('Saving images')
@@ -91,7 +101,9 @@ if __name__ == '__main__':
 
 
     logger.info('Stitchng images')
-    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, folder, args.verbose)
+    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, 
+         positive_threshold=positive_threshold, negative_threshold=negative_threshold, 
+         kernel_size=kernel_size, output_dir=folder)
 
     # Beep
     logger.info('Finished, exiting...')
