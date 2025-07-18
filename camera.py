@@ -31,6 +31,16 @@ class CameraWrapper():
       logger.critical('Setting exposure time failed')
       return
 
+    # Set gain
+    if os.system('v4l2-ctl -c gain=16') is not 0:
+      logger.critical('Setting gain failed')
+      return
+
+    # Set saturation
+    if os.system('v4l2-ctl -c saturation=102') is not 0:
+      logger.critical('Setting saturation failed')
+      return
+
     # No LED
     if os.system('python3 ~/Desktop/cameractrls/cameractrls.py -c logitech_led1_mode=off') is not 0:
       logger.critical('Disabling LED failed')

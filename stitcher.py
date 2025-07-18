@@ -18,8 +18,10 @@ def compute_gradients(img):
     return grad_mag
 
 def find_best_overlap(imgA, imgB,
-                      min_overlap=1,
-                      max_overlap=10,
+                    #   min_overlap=50,
+                    #   max_overlap=50,
+                      min_overlap=0,
+                      max_overlap=1,
                       pixel_weight=0.5,
                       grad_weight=0.5):
     # Ensure same height
@@ -82,8 +84,10 @@ def compute_gradients(img):
     return grad_mag
 
 def find_best_vertical_overlap(imgTop, imgBottom,
-                               min_overlap=10,
-                               max_overlap=None,
+                            #    min_overlap=50,
+                            #    max_overlap=50,
+                               min_overlap=0,
+                               max_overlap=1,
                                pixel_weight=0.5,
                                grad_weight=0.5):
     # Ensure same width
@@ -191,8 +195,10 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, output_di
     # Memory cleanup
     images = None
 
-    center_x = len(clipped_images) // 2
-    center_y = len(clipped_images[0]) // 2
+    #center_x = len(clipped_images) // 2
+    #center_y = len(clipped_images[0]) // 2
+    center_x = 0
+    center_y = 5
     logger.info(f'Using center {center_x}, {center_y}')
 
     logger.info('Finding best overlaps')
