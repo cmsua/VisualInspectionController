@@ -9,7 +9,16 @@ import matplotlib.pyplot as plt
 
 from PIL import Image
 
+import pickle as pkl
+
 logger = logging.getLogger('main')
+
+def pil_to_gray_array(image: Image.Image) -> np.ndarray:
+    """
+    Convert a PIL image to a 2D grayscale numpy array.
+    """
+    arr = np.array(image.convert('L'), dtype=np.float32)
+    return arr
 
 def align_image_general(
     image: Image.Image,
@@ -17,7 +26,7 @@ def align_image_general(
     dst_pts: np.ndarray
 ) -> Image.Image:
     """
-    Align an image by computing either a similarity (2-point) or full affine (3+ points) transform.
+    Align an image by computing either a similarity (2-point) transform.
 
     Args:
         image: PIL Image to transform.
@@ -31,36 +40,11 @@ def align_image_general(
     src = np.array(src_pts, dtype=np.float32)
     dst = np.array(dst_pts, dtype=np.float32)
 
-    if src.shape[0] == 2:
-        # Similarity transform (rotation + uniform scale + translation)
-        src_pt0, src_pt1 = src
-        dst_pt0, dst_pt1 = dst
-
-        # Compute input and output angles
-        angle_in = np.arctan2(src_pt1[1] - src_pt0[1], src_pt1[0] - src_pt0[0])
-        angle_out = np.arctan2(dst_pt1[1] - dst_pt0[1], dst_pt1[0] - dst_pt0[0])
-        angle = (angle_out - angle_in) * 180.0 / np.pi
-
-        # Compute uniform scale
-        len_in = np.linalg.norm(src_pt1 - src_pt0)
-        len_out = np.linalg.norm(dst_pt1 - dst_pt0)
-        scale = len_out / len_in if len_in > 0 else 1.0
-
-        # Build rotation matrix about the first source point
-        center = tuple(src_pt0)
-        M = cv2.getRotationMatrix2D(center, angle, scale)
-
-        # Translate so that src_pt0 maps exactly to dst_pt0
-        dx = float(dst_pt0[0] - src_pt0[0])
-        dy = float(dst_pt0[1] - src_pt0[1])
-        M[0, 2] += dx
-        M[1, 2] += dy
-
-    else:
-        # Full affine transform (allows skew) from 3+ points
-        M, _ = cv2.estimateAffine2D(src, dst, method=cv2.RANSAC)
-        if M is None:
-            raise ValueError("Could not compute affine transform with given points")
+    M, _ = cv2.estimateAffinePartial2D(src, dst, None, cv2.RANSAC,
+                                       ransacReprojThreshold=2.0,
+                                       maxIters=5000, confidence=0.999)
+    if M is None:
+        raise ValueError("Could not compute similarity transform")
 
     # Apply the affine/similarity warp
     arr = np.array(image)
@@ -152,8 +136,7 @@ def blob_centers(det_mask: np.ndarray,
 
         dist = cv2.distanceTransform(blob, cv2.DIST_L2, 3)
         ys, xs = np.where(blob)
-        idx = np.argmax(dist[ys, xs])
-        centres.append([xs[idx], ys[idx]])
+        centres.append([int(xs.mean()), int(ys.mean())])
 
     return np.asarray(centres, dtype=int)   # shape (N, 2)
 
@@ -182,8 +165,7 @@ def shrink_pattern(pat: np.ndarray, pixels: int = 1) -> np.ndarray:
     pat_eroded = cv2.erode(pat_uint8, se, iterations=pixels)
     return (pat_eroded > 0).astype(pat.dtype)
 
-def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_threshold: float, negative_threshold: float, kernel_size:int, output_dir: str):
-    circles_ref = np.load('a')
+def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_threshold: float, negative_threshold: float, kernel_size:int, output_dir: str, is_baseline: bool = False):
     circle_kernel = get_circle_pattern(kernel_size)
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
@@ -191,23 +173,42 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
     rows = len(images)
     columns = len(images[0])
 
+    try:
+        circles_ref = np.load('./circles_ref.pkl')
+    except:
+        circles_ref = []
+
     logger.debug(f'Clipping images, from {total_image_shape} to {vert_clip}, {horz_clip} (fractions {vert_clip_fraction}, {horz_clip_fraction})')
     pbar = tqdm.tqdm(desc='Clipping Images', total=rows*columns)
 
     adjusted_clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
     for row_num, row in enumerate(images):
-        for col_num, image in enumerate(row):
-            circle_coords = get_circles(circle_kernel, image, pos_thresh=positive_threshold, neg_thresh=negative_threshold, pixels_to_shrink=10)
-            circle_coords = keep_central_circles(circle_coords, image, x_clip=horz_clip, y_clip=vert_clip)
+        for col_num, image in enumerate(images):
+            circles_ref
+            image = Image.fromarray(images[row_num, col_num].astype(np.uint8))
+            bw_image = pil_to_gray_array(image)
+            circle_coords = get_circles(circle_kernel, bw_image, pos_thresh=positive_threshold, neg_thresh=negative_threshold, pixels_to_shrink=10)
+            circle_coords = keep_central_circles(circle_coords, bw_image, x_clip=150, y_clip=150)
             circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
-            aligned_image = align_image_general(image, src_pts=np.array(circle_coords[:3]), dst_pts=np.array(circles_ref[row_num][col_num][:3]))
-            clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
+            if is_baseline:
+                clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
+                circles_ref.append(circle_coords)
+            else:
+                aligned_image = align_image_general(image, src_pts=np.array(circle_coords), 
+                                                    dst_pts=np.array(circles_ref[row_num*columns+col_num]))
+                clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
             adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
     pbar.close()
 
-    if output_dir is not None:
+    if is_baseline:
+        np.save(os.path.join(output_dir, 'ref_image_array.npy'), adjusted_clipped_images)
+        with open('circles_ref.pkl', 'wb') as file:
+            pkl.dump(circles_ref, file)
+    elif output_dir is not None:
+        print("output dir exists")
         logger.debug('Saving...')
         np.save(os.path.join(output_dir, 'non-stitch-prepro-out.npy'), adjusted_clipped_images)
+        print("image saved to output dir")
 
     return adjusted_clipped_images

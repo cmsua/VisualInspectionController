@@ -101,7 +101,7 @@ if __name__ == '__main__':
     logger.info('Stitchng images')
     main(np_images, vertical_clip_fraction, horizontal_clip_fraction, 
          positive_threshold=positive_threshold, negative_threshold=negative_threshold, 
-         kernel_size=kernel_size, output_dir=folder)
+         kernel_size=kernel_size, output_dir=folder, is_baseline=args.baseline_path is not None)
 
     # Beep
     logger.info('Finished, exiting...')
