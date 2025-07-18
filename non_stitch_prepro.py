@@ -183,7 +183,7 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
 
     adjusted_clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
     for row_num, row in enumerate(images):
-        for col_num, image in enumerate(images):
+        for col_num, image in enumerate(row):
             circles_ref
             image = Image.fromarray(images[row_num, col_num].astype(np.uint8))
             bw_image = pil_to_gray_array(image)
