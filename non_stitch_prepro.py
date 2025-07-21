@@ -197,8 +197,8 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
                 print(f"image [{row_num}, {col_num}] skipped")
             else:
                 bw_image = pil_to_gray_array(image)
-                circle_coords = get_circles(circle_kernel, bw_image, col_num, pos_thresh=positive_thresholds, neg_thresh=negative_thresholds, pixels_to_shrink=10)
-                circle_coords = keep_central_circles(bw_image, row_num, col_num, circle_coords, bw_image, x_clip=150, y_clip=150)
+                circle_coords = get_circles(circle_kernel, bw_image, pos_thresh=positive_thresholds[col_num], neg_thresh=negative_thresholds[col_num], pixels_to_shrink=10)
+                circle_coords = keep_central_circles(circle_coords, bw_image, x_clip=150, y_clip=150)
                 circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
                 if is_baseline:
                     clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
@@ -212,7 +212,7 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
     pbar.close()
 
     if is_baseline:
-        np.save(os.path.join(output_dir, 'ref_image_array.npy'), adjusted_clipped_images)
+        np.save(os.path.join('./','ref_image_array.npy'), adjusted_clipped_images)
         with open('circles_ref.pkl', 'wb') as file:
             pkl.dump(circles_ref, file)
     elif output_dir is not None:

@@ -3,6 +3,7 @@ import os
 import datetime
 import argparse
 import time
+import numpy as np
 
 import tqdm.contrib.logging 
 
@@ -55,6 +56,7 @@ parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
 parser.add_argument('-b', '--baseline_path', type=str, default=None, help='Baseline board image paths. ' + \
                     'Only use if saving baseline boards.')
+parser.add_argument('-n', '--numpy', action='store_true', help='Use images from numpy directly rather than loading from pngs')
 
 if __name__ == '__main__':
   args = parser.parse_args()
@@ -69,7 +71,10 @@ if __name__ == '__main__':
       folder = max(all_subdirs, key=os.path.getmtime)
 
       logger.info(f'Loading images from folder {folder}')
-      np_images = load_images(folder)
+      if args.numpy:
+        np_images = np.load(os.path.join(folder, 'images.npy'))
+      else:
+        np_images = load_images(folder)
     elif args.dir:
       folder = args.dir
       logger.info(f'Loading images from folder {folder}')
@@ -100,7 +105,7 @@ if __name__ == '__main__':
       create_grid(np_images, os.path.join(folder, 'grid.jpg'), stitched_scale, x_start, x_inc, y_start, y_inc)
 
 
-    logger.info('Stitchng images')
+    logger.info('Adjusting and cropping images')
     main(np_images, vertical_clip_fraction, horizontal_clip_fraction, 
          positive_threshold=positive_threshold, negative_threshold=negative_threshold, 
          kernel_size=kernel_size, output_dir=folder, is_baseline=args.baseline_path is not None)
