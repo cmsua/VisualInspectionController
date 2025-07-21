@@ -101,7 +101,7 @@ def crop_image(img, x_clip, y_clip):
     return img_cropped
 
 def blob_centers(det_mask: np.ndarray,
-                 approx_marker_area: int = 363,
+                 approx_marker_area: int = 340,
                  split_large: bool = True) -> np.ndarray:
     det_uint = det_mask.astype(np.uint8)
 
@@ -154,8 +154,8 @@ def get_circles(pattern, img, pos_thresh, neg_thresh, pixels_to_shrink=3):
 
     det = (resp < thr) & (resp_inv > inv_thr)
     circle_coords   = blob_centers(det,
-                                 approx_marker_area=363,
-                                 split_large=False)
+                                   approx_marker_area=340,
+                                   split_large=False)
 
     return circle_coords
 
@@ -172,6 +172,12 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
     horz_clip = math.floor(total_image_shape[1]*horz_clip_fraction)
     rows = len(images)
     columns = len(images[0])
+    print(f"num cols: {columns}")
+    positive_thresholds = np.linspace(110, 145, columns)
+    negative_thresholds = np.linspace(150, 180, columns)
+    skip_list = [[0,0],[0,1],[0,7],[0,8],[1,0],[1,8],[2,0],[2,8],[3,0],[3,8],
+                 [7,0],[7,8],[8,0],[8,8],[9,0],[9,8],[10,0],[10,1],[10,7],[10,8],
+                 [11,0],[11,1],[11,7],[11,8]]
 
     try:
         circles_ref = np.load('./circles_ref.pkl')
@@ -186,17 +192,21 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
         for col_num, image in enumerate(row):
             circles_ref
             image = Image.fromarray(images[row_num, col_num].astype(np.uint8))
-            bw_image = pil_to_gray_array(image)
-            circle_coords = get_circles(circle_kernel, bw_image, pos_thresh=positive_threshold, neg_thresh=negative_threshold, pixels_to_shrink=10)
-            circle_coords = keep_central_circles(circle_coords, bw_image, x_clip=150, y_clip=150)
-            circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
-            if is_baseline:
+            if [row_num, col_num] in skip_list:
                 clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
-                circles_ref.append(circle_coords)
+                print(f"image [{row_num}, {col_num}] skipped")
             else:
-                aligned_image = align_image_general(image, src_pts=np.array(circle_coords), 
-                                                    dst_pts=np.array(circles_ref[row_num*columns+col_num]))
-                clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
+                bw_image = pil_to_gray_array(image)
+                circle_coords = get_circles(circle_kernel, bw_image, col_num, pos_thresh=positive_thresholds, neg_thresh=negative_thresholds, pixels_to_shrink=10)
+                circle_coords = keep_central_circles(bw_image, row_num, col_num, circle_coords, bw_image, x_clip=150, y_clip=150)
+                circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
+                if is_baseline:
+                    clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
+                    circles_ref.append(circle_coords)
+                else:
+                    aligned_image = align_image_general(image, src_pts=np.array(circle_coords), 
+                                                        dst_pts=np.array(circles_ref[row_num*columns+col_num]))
+                    clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
             adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
     pbar.close()
