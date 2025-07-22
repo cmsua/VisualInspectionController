@@ -1,4 +1,6 @@
 __pycache__/
+.venv/
+.vscode/
 images/
 Pictures/
 .ipynb_checkpoints/
