@@ -231,10 +231,10 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
                         circles_ref.append(circle_coords)
                     else:
                         c_coords, c_ref = bidirectional_match(np.array(circle_coords), np.array(circles_ref[row_num*columns+col_num]))
-                    aligned_image = align_image_general(image, src_pts=c_coords, 
+                        aligned_image = align_image_general(image, src_pts=c_coords, 
                                                         dst_pts=c_ref)
-                    clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
-            adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
+                        clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
+                adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
     except:
         print(f"Failed for {row_num}, {col_num}")
