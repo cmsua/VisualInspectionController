@@ -166,7 +166,7 @@ def shrink_pattern(pat: np.ndarray, pixels: int = 1) -> np.ndarray:
     pat_eroded = cv2.erode(pat_uint8, se, iterations=pixels)
     return (pat_eroded > 0).astype(pat.dtype)
 
-def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 2000):
+def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 100):
     tree_a, tree_b = cKDTree(a), cKDTree(b)
 
     # a -> b
@@ -198,46 +198,50 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, kernel_si
     columns = len(images[0])
     print(f"num cols: {columns}")
     positive_thresholds = np.linspace(110, 145, columns)
+    positive_thresholds[-1] = 165
     negative_thresholds = np.linspace(150, 180, columns)
-    skip_list = [[0,0],[0,1],[0,7],[0,8],[1,0],[1,8],[2,0],[2,8],[3,0],[3,8],
-                 [7,0],[7,8],[8,0],[8,8],[9,0],[9,8],[10,0],[10,1],[10,7],[10,8],
-                 [11,0],[11,1],[11,7],[11,8]]
-
-    try:
+    positive_thresholds[-1] = 205
+    skip_set = {(0,0),(0,1),(0,7),(0,8),(1,0),(1,8),(2,0),(2,8),(3,0),(3,8),
+                (7,0),(7,8),(8,0),(8,8),(9,0),(9,8),(10,0),(10,1),(10,7),(10,8),
+                (11,0),(11,1),(11,7),(11,8)}
+    
+    if not is_baseline:
         with open('./circles_ref.pkl', 'rb') as f:
             circles_ref = pkl.load(f)
-        print(len(circles_ref))
-    except:
+        print(f"Circles ref length: {len(circles_ref)}")
+    else:
         circles_ref = []
 
     logger.debug(f'Clipping images, from {total_image_shape} to {vert_clip}, {horz_clip} (fractions {vert_clip_fraction}, {horz_clip_fraction})')
     pbar = tqdm.tqdm(desc='Clipping Images', total=rows*columns)
 
-    try:
-        adjusted_clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
-        for row_num, row in enumerate(images):
-            for col_num, image in enumerate(row):
-                image = Image.fromarray(images[row_num, col_num].astype(np.uint8))
-                if [row_num, col_num] in skip_list:
+
+    # try:
+    adjusted_clipped_images = np.zeros((rows, columns, total_image_shape[0] - 2 * vert_clip, total_image_shape[1] - 2 * horz_clip, 3), dtype=np.uint8)
+    for row_num, row in enumerate(images):
+        for col_num, image in enumerate(row):
+            image = Image.fromarray(images[row_num, col_num].astype(np.uint8))
+            if (row_num, col_num) in skip_set:
+                clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
+                print(f"image [{row_num}, {col_num}] skipped")
+                if is_baseline:
+                    circles_ref.append(np.array([[0,0]]))
+            else:
+                bw_image = pil_to_gray_array(image)
+                circle_coords = get_circles(circle_kernel, bw_image, pos_thresh=positive_thresholds[col_num], neg_thresh=negative_thresholds[col_num], pixels_to_shrink=10)
+                circle_coords = keep_central_circles(circle_coords, bw_image, x_clip=150, y_clip=150)
+                circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
+                if is_baseline:
                     clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
-                    print(f"image [{row_num}, {col_num}] skipped")
+                    circles_ref.append(circle_coords)
                 else:
-                    bw_image = pil_to_gray_array(image)
-                    circle_coords = get_circles(circle_kernel, bw_image, pos_thresh=positive_thresholds[col_num], neg_thresh=negative_thresholds[col_num], pixels_to_shrink=10)
-                    circle_coords = keep_central_circles(circle_coords, bw_image, x_clip=150, y_clip=150)
-                    circle_coords = circle_coords[np.lexsort((circle_coords[:, 1], circle_coords[:, 0]))]
-                    if is_baseline:
-                        clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
-                        circles_ref.append(circle_coords)
-                    else:
-                        c_coords, c_ref = bidirectional_match(np.array(circle_coords), np.array(circles_ref[row_num*columns+col_num]))
-                        aligned_image = align_image_general(image, src_pts=c_coords, 
-                                                            dst_pts=c_ref)
-                        clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
+                    c_coords, c_ref = bidirectional_match(np.array(circle_coords), np.array(circles_ref[row_num*columns+col_num]))
+                    aligned_image = align_image_general(image, src_pts=c_coords, dst_pts=c_ref)
+                    clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
             adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
-    except:
-        print(f"Failed for {row_num}, {col_num}")
+    # except:
+    #     print(f"Failed for {row_num}, {col_num}")
     pbar.close()
 
 
