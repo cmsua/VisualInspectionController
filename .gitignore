@@ -4,3 +4,5 @@ __pycache__/
 images/
 Pictures/
 .ipynb_checkpoints/
+circles_ref.pkl
+ref_image_array.npy
