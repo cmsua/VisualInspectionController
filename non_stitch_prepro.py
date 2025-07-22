@@ -166,7 +166,7 @@ def shrink_pattern(pat: np.ndarray, pixels: int = 1) -> np.ndarray:
     pat_eroded = cv2.erode(pat_uint8, se, iterations=pixels)
     return (pat_eroded > 0).astype(pat.dtype)
 
-def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 150):
+def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 2000):
     tree_a, tree_b = cKDTree(a), cKDTree(b)
 
     # a -> b
@@ -189,7 +189,7 @@ def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 150):
         return np.vstack(keep_ref), np.vstack(keep_new)
     return np.empty((0, 2), a.dtype), np.empty((0, 2), b.dtype)
 
-def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_threshold: float, negative_threshold: float, kernel_size:int, output_dir: str, is_baseline: bool = False):
+def main(images, vert_clip_fraction: float, horz_clip_fraction: float, kernel_size:int, output_dir: str, is_baseline: bool = False):
     circle_kernel = get_circle_pattern(kernel_size)
     total_image_shape = images[0][0].shape
     vert_clip = math.floor(total_image_shape[0]*vert_clip_fraction)
@@ -232,9 +232,9 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
                     else:
                         c_coords, c_ref = bidirectional_match(np.array(circle_coords), np.array(circles_ref[row_num*columns+col_num]))
                         aligned_image = align_image_general(image, src_pts=c_coords, 
-                                                        dst_pts=c_ref)
+                                                            dst_pts=c_ref)
                         clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
-                adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
+            adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
     except:
         print(f"Failed for {row_num}, {col_num}")

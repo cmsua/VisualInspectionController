@@ -26,9 +26,7 @@ y_end = 186
 # y_end = 56
 y_inc = 13
 
-positive_threshold = 50
-negative_threshold = 110
-kernel_size = 363
+kernel_size = 340
 
 stabilize_delay = 2.2
 
@@ -106,8 +104,7 @@ if __name__ == '__main__':
 
 
     logger.info('Adjusting and cropping images')
-    main(np_images, vertical_clip_fraction, horizontal_clip_fraction, 
-         positive_threshold=positive_threshold, negative_threshold=negative_threshold, 
+    main(np_images, vertical_clip_fraction, horizontal_clip_fraction,
          kernel_size=kernel_size, output_dir=folder, is_baseline=args.baseline_path is not None)
 
     # Beep
