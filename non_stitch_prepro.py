@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 import tqdm
 import matplotlib.pyplot as plt
+from scipy.spatial import cKDTree
 
 from PIL import Image
 
@@ -165,6 +166,29 @@ def shrink_pattern(pat: np.ndarray, pixels: int = 1) -> np.ndarray:
     pat_eroded = cv2.erode(pat_uint8, se, iterations=pixels)
     return (pat_eroded > 0).astype(pat.dtype)
 
+def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 150):
+    tree_a, tree_b = cKDTree(a), cKDTree(b)
+
+    # a -> b
+    dist_ab, idx_ab = tree_b.query(a, distance_upper_bound=radius)
+    # b -> a
+    dist_ba, idx_ba = tree_a.query(b, distance_upper_bound=radius)
+
+    keep_ref, keep_new = [], []
+    used_b = set()
+
+    for i, (d, j) in enumerate(zip(dist_ab, idx_ab)):
+        if d <= radius and j < len(b):           # ai found a neighbour
+            # require mutual nearest and that bj not reused
+            if idx_ba[j] == i and dist_ba[j] <= radius and j not in used_b:
+                keep_ref.append(a[i])
+                keep_new.append(b[j])
+                used_b.add(j)
+
+    if keep_ref:   # convert to arrays; else return empty (0, 2)
+        return np.vstack(keep_ref), np.vstack(keep_new)
+    return np.empty((0, 2), a.dtype), np.empty((0, 2), b.dtype)
+
 def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_threshold: float, negative_threshold: float, kernel_size:int, output_dir: str, is_baseline: bool = False):
     circle_kernel = get_circle_pattern(kernel_size)
     total_image_shape = images[0][0].shape
@@ -204,8 +228,9 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, positive_
                     clipped_img = crop_image(np.array(image), horz_clip, vert_clip)
                     circles_ref.append(circle_coords)
                 else:
-                    aligned_image = align_image_general(image, src_pts=np.array(circle_coords), 
-                                                        dst_pts=np.array(circles_ref[row_num*columns+col_num]))
+                    c_coords, c_ref = bidirectional_match(np.array(circle_coords), np.array(circles_ref[row_num*columns+col_num]))
+                    aligned_image = align_image_general(image, src_pts=c_coords, 
+                                                        dst_pts=c_ref)
                     clipped_img = crop_image(np.array(aligned_image), horz_clip, vert_clip)
             adjusted_clipped_images[rows - row_num - 1][col_num] = clipped_img
             pbar.update()
