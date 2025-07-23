@@ -76,7 +76,10 @@ if __name__ == '__main__':
     elif args.dir:
       folder = args.dir
       logger.info(f'Loading images from folder {folder}')
-      np_images = load_images(folder)
+      if args.numpy:
+        np_images = np.load(os.path.join(folder, 'images.npy'))
+      else:
+        np_images = load_images(folder)
     else:
       logger.info('Scanning images')
       start_time = datetime.datetime.now()
