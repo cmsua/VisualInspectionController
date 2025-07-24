@@ -49,7 +49,10 @@ def home_printer(printer: moonpy.MoonrakerPrinter, camera: CameraWrapper, stabil
 
     # Mechanical homing
     logger.debug('Homing X+Y mechanically')
-    printer.send_gcode('G28 X Y')
+    printer.send_gcode('G28 X')
+    printer.send_gcode('G0 X100')
+    printer.send_gcode('M400')
+    printer.send_gcode('G28 Y')
     printer.send_gcode('M400')
 
     printer.send_gcode('G90')

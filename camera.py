@@ -42,7 +42,7 @@ class CameraWrapper():
       return
 
     # No LED
-    if os.system('python3 ~/Desktop/cameractrls/cameractrls.py -c logitech_led1_mode=off') is not 0:
+    if os.system('python3 ~/cameractrls/cameractrls.py -c logitech_led1_mode=off') is not 0:
       logger.critical('Disabling LED failed')
       return
 
