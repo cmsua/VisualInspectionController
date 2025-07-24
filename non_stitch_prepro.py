@@ -166,7 +166,7 @@ def shrink_pattern(pat: np.ndarray, pixels: int = 1) -> np.ndarray:
     pat_eroded = cv2.erode(pat_uint8, se, iterations=pixels)
     return (pat_eroded > 0).astype(pat.dtype)
 
-def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 200):
+def bidirectional_match(a: np.ndarray, b: np.ndarray, radius: float = 350):
     tree_a, tree_b = cKDTree(a), cKDTree(b)
 
     # a -> b
@@ -199,8 +199,9 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, kernel_si
     print(f"num cols: {columns}")
     positive_thresholds = np.linspace(110, 145, columns)
     positive_thresholds[-1] = 165
-    negative_thresholds = np.linspace(150, 180, columns)
-    positive_thresholds[-1] = 195
+    positive_thresholds[-2] = 150
+    negative_thresholds = np.linspace(145, 180, columns)
+    positive_thresholds[-1] = 200
     skip_set = {(0,0),(0,1),(0,7),(0,8),(1,0),(1,8),(2,0),(2,8),(3,0),(3,8),
                 (7,0),(7,8),(8,0),(8,8),(9,0),(9,8),(10,0),(10,1),(10,7),(10,8),
                 (11,0),(11,1),(11,7),(11,8)}
