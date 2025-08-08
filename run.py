@@ -21,7 +21,7 @@ x_start = 49
 x_end = 225
 x_inc = 22
 
-y_start = 43
+y_start = 30
 y_end = 186
 # y_end = 56
 y_inc = 13
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
       if args.board  is not None:
         # Make Dirs for baseline path
-        folder = os.path.join(output_dir, args.board, str(start_time))
+        folder = os.path.join(output_dir, args.board)
       else:
         # Make Dirs
         folder = os.path.join(output_dir, str(start_time))
