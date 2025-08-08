@@ -50,10 +50,9 @@ parser.add_argument('-r', '--reuse', action='store_true', help='Reuse the latest
 parser.add_argument('-d', '--dir', type=str, help='Load a specific folder')
 parser.add_argument('-g', '--grid', action='store_true', help='Enable raw grid creation')
 parser.add_argument('-s', '--silent', action='store_true', help='Disable beeping when done')
-parser.add_argument('-v', '--verbose',
-                    action='store_true')  # on/off flag
-parser.add_argument('-b', '--baseline_path', type=str, default=None, help='Baseline board image paths. ' + \
-                    'Only use if saving baseline boards.')
+parser.add_argument('-v', '--verbose', action='store_true', help='Whether to save pngs and intermediates')
+parser.add_argument('-b', '--board', type=str, default=None, help='Board id')
+parser.add_argument('--ref',  action='store_true', help ='Whether the board is a reference board')
 parser.add_argument('-n', '--numpy', action='store_true', help='Use images from numpy directly rather than loading from pngs')
 
 if __name__ == '__main__':
@@ -85,9 +84,9 @@ if __name__ == '__main__':
       start_time = datetime.datetime.now()
       np_images = create_images(x_start, x_inc, x_end, y_start, y_inc, y_end, stabilize_delay, skipped_points)
 
-      if args.baseline_path is not None:
+      if args.board  is not None:
         # Make Dirs for baseline path
-        folder = os.path.join(output_dir, args.baseline_path)
+        folder = os.path.join(output_dir, args.board, str(start_time))
       else:
         # Make Dirs
         folder = os.path.join(output_dir, str(start_time))
@@ -108,7 +107,7 @@ if __name__ == '__main__':
 
     logger.info('Adjusting and cropping images')
     main(np_images, vertical_clip_fraction, horizontal_clip_fraction,
-         kernel_size=kernel_size, output_dir=folder, is_baseline=args.baseline_path is not None)
+         kernel_size=kernel_size, output_dir=folder, is_baseline=args.ref)
 
     # Beep
     logger.info('Finished, exiting...')
