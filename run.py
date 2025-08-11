@@ -28,7 +28,7 @@ y_inc = 13
 
 kernel_size = 340
 
-stabilize_delay = 2.2
+stabilize_delay = 2.5
 
 stitched_scale = 1
 

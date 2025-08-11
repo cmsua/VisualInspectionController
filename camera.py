@@ -27,12 +27,12 @@ class CameraWrapper():
     if os.system('v4l2-ctl -c backlight_compensation=0,white_balance_automatic=0,auto_exposure=1,exposure_dynamic_framerate=0') is not 0:
       logger.critical('Disabling backlight compensation/auto white balance/auto exposure failed')
       return
-    if os.system('v4l2-ctl -c exposure_time_absolute=2047') is not 0:
+    if os.system('v4l2-ctl -c exposure_time_absolute=1007') is not 0:
       logger.critical('Setting exposure time failed')
       return
 
     # Set gain
-    if os.system('v4l2-ctl -c gain=16') is not 0:
+    if os.system('v4l2-ctl -c gain=40') is not 0:
       logger.critical('Setting gain failed')
       return
 
