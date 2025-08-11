@@ -197,14 +197,11 @@ def main(images, vert_clip_fraction: float, horz_clip_fraction: float, kernel_si
     rows = len(images)
     columns = len(images[0])
     print(f"num cols: {columns}")
-    positive_thresholds = np.linspace(110, 145, columns)
-    positive_thresholds[-1] = 165
-    positive_thresholds[-2] = 150
-    negative_thresholds = np.linspace(145, 180, columns)
-    positive_thresholds[-1] = 200
-    skip_set = {(0,0),(0,1),(0,7),(0,8),(1,0),(1,8),(2,0),(2,8),(3,0),(3,8),
-                (7,0),(7,8),(8,0),(8,8),(9,0),(9,8),(10,0),(10,1),(10,7),(10,8),
-                (11,0),(11,1),(11,7),(11,8)}
+    positive_thresholds = np.linspace(100, 135, cols)
+    negative_thresholds = np.linspace(135, 175, cols)
+    skip_set = {(0,0),(0,1),(0,7),(0,8),(1,0),(1,8),(2,0),(2,8),(3,0),(3,8),(4,0),(4,8),
+                (8,0),(8,8),(9,0),(9,8),(10,0),(10,1),(10,7),(10,8),
+                (11,0),(11,1),(11,8),(12,0),(12,1),(12,7),(12,8)}
     
     if not is_baseline:
         with open('./circles_ref.pkl', 'rb') as f:
