@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
       if args.board  is not None:
         # Make Dirs for baseline path
-        folder = os.path.join(output_dir, args.board)
+        folder = os.path.join(output_dir, args.board + '_' + str(start_time))
       else:
         # Make Dirs
         folder = os.path.join(output_dir, str(start_time))
