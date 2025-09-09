@@ -6,3 +6,5 @@ Pictures/
 .ipynb_checkpoints/
 circles_ref.pkl
 ref_image_array.npy
+Old_Scans/
+align_fail_debug
