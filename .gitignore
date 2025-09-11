@@ -1,10 +1,8 @@
 __pycache__/
 .venv/
 .vscode/
-images/
-Pictures/
 .ipynb_checkpoints/
-circles_ref.pkl
-ref_image_array.npy
-Old_Scans/
+*.pkl
+*.npy
 align_fail_debug
+data/

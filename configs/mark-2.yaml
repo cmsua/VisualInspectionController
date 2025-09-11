@@ -1,0 +1,21 @@
+output_directory: data
+
+machine:
+  type: serial
+  port: /dev/serial/by-id/usb-STMicroelectronics_MARLIN_STM32G0B1RE_CDC_in_FS_Mode_20783671524E-if00
+  baud: 115200
+  stabilize_delay: 0.5
+  speed: 12000
+  coordinates:
+    x_start: 180
+    x_end: 0
+    x_inc: -20
+    y_start: 0
+    y_end: 160
+    y_inc: 10
+  home:
+  - G28 XY
+  - M400
+camera:
+  type: microscope
+  id: /dev/v4l/by-id/usb-RaySmartTech_VMS101S_00.00.01-video-index0

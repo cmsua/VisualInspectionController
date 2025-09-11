@@ -1,0 +1,24 @@
+output_directory: data
+
+machine:
+  type: moonraker
+  address: http://localhost
+  stabilize_delay: 2.5
+  speed: 12000
+  coordinates:
+    x_start: 49
+    x_end: 225
+    x_inc: 22
+    y_start: 30
+    y_end: 186
+    y_inc: 13
+  home:
+  - G28 X
+  - G0 X100
+  - M400
+  - G28 Y
+  - M400
+  - G90
+camera:
+  type: logitech
+  id: /dev/v4l/by-id/usb-046d_Logitech_BRIO_ED95B218-video-index0
