@@ -20,7 +20,7 @@ class Microscope(Camera):
         os.system("killall cheese")
 
         # Open camera
-        self.cap = cv2.VideoCapture(int(os.path.realpath(self._id)[-1]))
+        self.cap = cv2.VideoCapture(self._id)
         if not self.cap or not self.cap.isOpened():
             logger.critical("Cannot open camera!")
             sys.exit(1)

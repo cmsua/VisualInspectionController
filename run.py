@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import time
+import sys
 
 import tqdm.contrib.logging
 import yaml
@@ -61,6 +62,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s - %(name)-24s - %(levelname)-7s - %(message)s (%(filename)s:%(lineno)d)",
         level=logging.DEBUG if args.debug else logging.INFO,
+        handlers=[logging.StreamHandler(sys.stdout)]
     )
     logger = logging.getLogger("main")
 

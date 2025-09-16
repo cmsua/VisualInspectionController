@@ -32,11 +32,11 @@ class LogitechWebcam(Camera):
         for command in self.commands:
             logger.debug(f"Calling {command}")
             rc = os.system(command)
-            if rc is not 0:
+            if rc != 0:
                 raise RuntimeError(f"Command returned with code {rc}: {command}")
 
         # Open camera
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(self._id)
         if not self.cap or not self.cap.isOpened():
             logger.critical("Cannot open camera!")
             sys.exit(1)
