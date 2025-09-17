@@ -82,7 +82,7 @@ class PrinterMachine(Machine):
             forward = not forward
 
         seconds = (datetime.datetime.now() - start_time).seconds
-        logger.info(f"Finished in {seconds}s")
+        logger.info(f"Finished {x_images * y_images} ({x_images} by {y_images}) images in {seconds}s")
 
         return images
 

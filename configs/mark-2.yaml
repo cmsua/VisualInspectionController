@@ -4,7 +4,7 @@ machine:
   type: serial
   port: /dev/serial/by-id/usb-STMicroelectronics_MARLIN_STM32G0B1RE_CDC_in_FS_Mode_20783671524E-if00
   baud: 115200
-  stabilize_delay: 0.5
+  stabilize_delay: 0.15
   speed: 12000
   coordinates:
     x_start: 180
@@ -16,6 +16,8 @@ machine:
   home:
   - G28 XY
   - M400
+  - M906 X2000 Y2000
+  - M203 X15 Y15
 camera:
   type: microscope
   id: /dev/v4l/by-id/usb-RaySmartTech_VMS101S_00.00.01-video-index0
