@@ -2,6 +2,7 @@ import logging
 import math
 import os
 import pickle as pkl
+import argparse
 
 import cv2
 import matplotlib.pyplot as plt
@@ -364,7 +365,6 @@ def main(
     horz_clip_fraction: float,
     kernel_size: int,
     output_dir: str,
-    # image_num: int,
     is_baseline: bool = False,
 ):
     circle_kernel = get_circle_pattern(kernel_size)
@@ -375,9 +375,9 @@ def main(
     columns = len(images[0])
     print(f"num cols: {columns}")
 
-    positive_thresholds, negative_thresholds = compute_thresholds(
-        images, num_cols=columns
-    )
+    # positive_thresholds, negative_thresholds = compute_thresholds(
+    #     images, num_cols=columns
+    # )
 
     skip_set = {
         (0, 0),
@@ -453,8 +453,8 @@ def main(
                 circle_coords = get_circles(
                     circle_kernel,
                     tile_bgr_f32,
-                    pos_thresh=positive_thresholds[col_num],
-                    neg_thresh=negative_thresholds[col_num],
+                    pos_thresh=32,
+                    neg_thresh=115,
                     pixels_to_shrink=10,
                     mode="soft",   # or "strict" if you pass per-channel thresholds
                 )
@@ -511,14 +511,28 @@ def main(
 
 
 if __name__ == "__main__":
-    # Set up parameters
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-b", "--baseline", help = "creates a baseline image")
+    parser.add_argument("-i", "--input", help = "input image variable")
+    args = parser.parse_args()
+
+    if args.baseline:
+        is_baseline = True
+    else:
+        is_baseline = False
+
+    if args.input:
+        img_path = args.input
+    else:
+        print("No input found. Please provide a path to a numpy file.")
+
+
     output_dir = "./Pictures"
-    image_num = 10
-    img = np.load(os.path.join(output_dir, f"images{image_num}.npy"))
-    vert_clip_fraction = 0.265
-    horz_clip_fraction = 0.3
+    vert_clip_fraction = 0
+    horz_clip_fraction = 0
     kernel_size = 340
-    is_baseline = True if image_num == 1 else False
+    img = np.load(f"{img_path}")
 
     main(
         images=img,
@@ -526,7 +540,6 @@ if __name__ == "__main__":
         horz_clip_fraction=horz_clip_fraction,
         kernel_size=kernel_size,
         output_dir=output_dir,
-        image_num=image_num,
         is_baseline=is_baseline,
     )
 
